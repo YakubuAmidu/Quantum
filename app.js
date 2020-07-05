@@ -23,102 +23,105 @@ var budgetController = (function(){
 };
 
 
-  
+var Income = function(id, description, value) {
+    this.id = id;
+    this.description = description;
+    this.value = value;
+};
 
-        calculatePercentages: function() {
 
-            /*
-            a=20
-            b=10
-            c=40
-            inconme = 100
-            a=20/100=20%
-            b=10/100=10%
-            c=40/100=40%
-            */
+var calculateTotal = function(type) {
+    var sum = 0;
+    data.allItems[type].forEach(function(cur) {
+       sum += cur.value;
+    });
+    data.totals[type] = sum;
+};
 
-            data.allItems.exp.forEach(function(cur){
-                cur.calcPercentage(data.totals.inc);
-            });
+var data = {
+    allItems: {
+        exp: [],
+        inc: []
+    },
+    totals: {
+        exp: 0,
+        inc: 0
+    },
+    budget: 0,
+    percentage: -1
+};
+
+return {
+    addItem: function(type, des, val) {
+        var newItem, ID;
+
+        // Create new ID
+        if (data.allItems[type].length > 0) {
+
+            ID = data.allItems[type][data.allItems[type].length - 1].id + 1;
+
+        } else {
+            ID = 0;
+        }
+
+        // Create new Item based on 'inc' or 'exp'
+        if(type === 'exp'){
+             newItem = new Expense(ID, des, val);
+        } else if (type === 'inc'){
+            newItem = new Income(ID, des, val);
+        }
+
+        // Push it into our data structure
+        data.allItems[type].push(newItem);
+
+        // Return the new element
+        return newItem;
     },
 
-        getPercentages: function() {
-            var allPerc = data.allItems.exp.map(function(cur){
-               return cur.getPercentage();
-            });
-            return allPerc;
+    deleteItem: function(type, id) {
+        var ids, index;
 
-},
+        // id = 6
+        // data.allItems[type][id]
+        // ids = [1 2 4 6 8]
+        // index = 3
 
-        getBudget: function() {
-            return {
-                budget: data.budget,
-                totalInc: data.totals.inc,
-                totalExp: data.totals.exp,
-                percentage: data.percentage
-            };
-        },
+        ids = data.allItems[type].map(function(current) {
+            return current.id;
+        });
 
+        index = ids.indexOf(id);
 
-        testing: function() {
-            console.log(data);
+        if(index !== -1){
+            data.allItems[type].splice(index, 1);
         }
-    };
+    },
 
-})();
+    calculateBudget: function() {
+
+        // Calculate total income and expenses
+        calculateTotal('exp');
+        calculateTotal('inc');
+
+        // Calculate the budget: income - expenses
+        data.budget = data.totals.inc - data.totals.exp;
 
 
-// UI CONTROLLER
-var UIController = (function(){
+        // Calculate the percentage of that we spent
 
-    var DomStrings = {
-        inputType: '.add__type',
-        inputDescription: '.add__description',
-        inputValue: '.add__value',
-        inputBtn: '.add__btn',
-        incomeContainer: '.income__list',
-        ExpensesContainer: '.expenses__list',
-        budgetLabel: '.budget__value',
-        incomeLabel: '.budget__income--value',
-        expensesLabel: '.budget__expenses--value',
-        percentageLabel: '.budget__expenses--percentage',
-        container: '.container',
-        expensesPercLabel: '.item__percentage',
-        dateLabel: '.budget__title--month'
-    };
+        if(data.totals.inc > 0){
 
-    var formatNumber = function(num, type) {
-                var numSplit, int, dec, type;
-                /*
-                + or - before number
-                exactly 2 decimal point
-                comma separating the thousands
+         data.percentage = Math.round((data.totals.exp / data.totals.inc)  * 100);
 
-                2310.4567 -> +2,310.46
-                2000 -> +2,000.00
-                */
+        }  else {
+            data.percentage = - 1;
+        }
+        // Expense = 100 and income 300, spent 33.333% = 100/300 = 0.333 * 100
 
-            num = Math.abs(num);
-            num = num.toFixed(2);
 
-            numSplit = num.split('.');
+    },
 
-            int = numSplit[0];
-            if(int.length > 3) {
-                int = int.substr(0, int.length - 3) + ',' + int.substr(int.length - 3, int.length);
-            }
-
-            dec = numSplit[1];
-
-            return (type === 'exp' ? '-' : '+') + ' ' + int + '.' + dec;
-    };
-
-    var nodeListForEach = function(list, callback) {
-                for(var i = 0; i < list.length; i++) {
-                    callback(list[i], i);
-                }
-            };
-
+      
 
     return {
         getInput: function() {
