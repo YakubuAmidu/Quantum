@@ -216,44 +216,63 @@ var nodeListForEach = function(list, callback) {
         };
 
 
-    
-            fieldsArr[0].focus();
+        return {
+            getInput: function() {
+                return {
+                type: document.querySelector(DomStrings.inputType).value, // Will be either inc or exp
+                description: document.querySelector(DomStrings.inputDescription).value,
+                value: parseFloat(document.querySelector(DomStrings.inputValue).value)
+                };
+            },
 
-        },
+            addListItem: function(obj, type) {
 
-        displayBudget: function(obj) {
-        var type;
-        obj.budget > 0 ? type = 'inc' : type = 'exp';
+                var html, newHtml, element;
 
-        document.querySelector(DomStrings.budgetLabel).textContent = formatNumber(obj.budget, type);
-        document.querySelector(DomStrings.incomeLabel).textContent = formatNumber(obj.totalInc, 'inc');
-        document.querySelector(DomStrings.expensesLabel).textContent = formatNumber(obj.totalExp, 'exp');
+                // Create HTML string with placeholder text
 
+                if(type === 'inc'){
+                    element = DomStrings.incomeContainer;
 
-        if(obj.percentage > 0) {
-            document.querySelector(DomStrings.percentageLabel).textContent = obj.percentage + '%';
-        } else {
-            document.querySelector(DomStrings.percentageLabel).textContent = '---';
-        }
-    },
+                     html = '<div class="item clearfix" id="inc-%id%"> <div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></di></div></div>';
 
+                } else if(type === 'exp'){
+                    element = DomStrings.ExpensesContainer;
 
-        displayPercentages: function(percentages) {
-
-            var fields = document.querySelectorAll(DomStrings.expensesPercLabel);
-
-
-            nodeListForEach(fields, function(current, index) {
-
-                if(percentages[index] > 0) {
-                current.textContent = percentages[index] + '%';
-                } else {
-                    current.textContent = '---';
+                    html = '<div class="item clearfix" id="exp-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
                 }
-            });
 
-        },
+                // Replace the placeholder text with some actual data
+                newHtml = html.replace('%id%', obj.id);
+                newHtml = newHtml.replace('%description%', obj.description);
+                newHtml = newHtml.replace('%value%', formatNumber(obj.value, type));
 
+
+
+                // Insert the HTML into the DOM
+                document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
+
+            },
+
+            deleteListItem: function(selectorID) {
+
+                var el = document.getElementById(selectorID);
+                el.parentNode.removeChild(el);
+
+            },
+
+            clearFields: function() {
+                var fields, fieldsArr;
+
+                fields = document.querySelectorAll(DomStrings.inputDescription + ', ' + DomStrings.inputValue);
+
+                var fieldsArr = Array.prototype.slice.call(fields);
+
+                fieldsArr.forEach(function(current, index, array) {
+                    current.value = "";
+                });
+
+          
         displayMonth: function() {
             var now, months, month, year;
 
