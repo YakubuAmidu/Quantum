@@ -362,50 +362,62 @@ var nodeListForEach = function(list, callback) {
             }
           });
 
-        
-    var ctrlDeleteItem = function(event) {
-        var itemID, splitID, type, ID;
+          document.querySelector(Dom.container).addEventListener('click', ctrlDeleteItem);
 
-        itemID = event.target.parentNode.parentNode.parentNode.parentNode.id;
+          document.querySelector(Dom.inputType).addEventListener('change', UICtrl.changeType);
 
-        if(itemID) {
+      };
 
-            // inc-1
-            splitID = itemID.split('-');
-            type = splitID[0];
-            ID = parseInt(splitID[1]);
+      var updateBudget = function() {
 
-            // 1. Delete the Item from the data structure
-            budgetCtrl.deleteItem(type, ID);
+           // 1. Calculate the budget
+          budgetCtrl.calculateBudget();
+
+           // Return the budget
+          var budget = budgetCtrl.getBudget();
 
 
-            // 2. Delete the Item from UI
+           // 2. Display the budget on the UI
+          UICtrl.displayBudget(budget);
+      };
 
-            UICtrl.deleteListItem(itemID);
 
-            // 3. Update and show the new budget
+      var updatePercentages = function() {
 
-            updateBudget();
+          // 1. Calculate percentages
+          budgetCtrl.calculatePercentages();
+          // 2. Read percentages from the budget controler
+          var percentages = budgetCtrl.getPercentages();
+          // 3. Update the UI with the new percentages
+          UICtrl.displayPercentages(percentages);
+      };
 
-            // 4. Calculate and update percentages
-            updatePercentages();
-        }
+      var ctrlAddItem = function() {
+          var input, newItem;
 
-    };
+          // 1. Get the field input data
+          input = UICtrl.getInput();
 
-    return {init: function() {
-        console.log('Application has started.');
-        UICtrl.displayMonth();
-         UICtrl.displayBudget({
-            budget: 0,
-            totalInc: 0,
-            totalExp: 0,
-            percentage: -1
-         });
-        setUpEvenListeners();
-    }
-};
+          if(input.description !== "" && !isNaN(input.value) && input.value > 0) {
 
-})(budgetController, UIController);
+               // 2. Add the item to the budget controller
+          newItem = budgetCtrl.addItem(input.type, input.description, input.value);
 
-controller.init();
+
+      // 3. Add the item to the UI
+          UICtrl.addListItem(newItem, input.type);
+
+
+      // 4. Clear the fields
+      UICtrl.clearFields();
+
+      // 5. Calculate and update budget
+          updateBudget();
+
+      // 6. Calculate and update percentages
+              updatePercentages();
+
+          }
+      };
+
+    
