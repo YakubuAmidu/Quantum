@@ -420,4 +420,49 @@ var nodeListForEach = function(list, callback) {
           }
       };
 
-    
+      var ctrlDeleteItem = function(event) {
+          var itemID, splitID, type, ID;
+
+          itemID = event.target.parentNode.parentNode.parentNode.parentNode.id;
+
+          if(itemID) {
+
+              // inc-1
+              splitID = itemID.split('-');
+              type = splitID[0];
+              ID = parseInt(splitID[1]);
+
+              // 1. Delete the Item from the data structure
+              budgetCtrl.deleteItem(type, ID);
+
+
+              // 2. Delete the Item from UI
+
+              UICtrl.deleteListItem(itemID);
+
+              // 3. Update and show the new budget
+
+              updateBudget();
+
+              // 4. Calculate and update percentages
+              updatePercentages();
+          }
+
+      };
+
+      return {init: function() {
+          console.log('Application has started.');
+          UICtrl.displayMonth();
+           UICtrl.displayBudget({
+              budget: 0,
+              totalInc: 0,
+              totalExp: 0,
+              percentage: -1
+           });
+          setUpEvenListeners();
+      }
+  };
+
+  })(budgetController, UIController);
+
+  controller.init();
