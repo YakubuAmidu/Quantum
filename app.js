@@ -309,65 +309,60 @@ var nodeListForEach = function(list, callback) {
 
             },
 
-      
-        document.querySelector(Dom.container).addEventListener('click', ctrlDeleteItem);
+            displayMonth: function() {
+                var now, months, month, year;
 
-        document.querySelector(Dom.inputType).addEventListener('change', UICtrl.changeType);
+                now = new Date();
+                //var Christmas = new Date(2016, 11, 25);
+                months = ['January', 'Februay', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'November', 'December']
+                month = now.getMonth();
 
-    };
+                year = now.getFullYear();
+                document.querySelector(DomStrings.dateLabel).textContent = months[month] + ' ' + year;
 
-    var updateBudget = function() {
+            },
 
-         // 1. Calculate the budget
-        budgetCtrl.calculateBudget();
+            changedType: function() {
 
-         // Return the budget
-        var budget = budgetCtrl.getBudget();
-
-
-         // 2. Display the budget on the UI
-        UICtrl.displayBudget(budget);
-    };
-
-
-    var updatePercentages = function() {
-
-        // 1. Calculate percentages
-        budgetCtrl.calculatePercentages();
-        // 2. Read percentages from the budget controler
-        var percentages = budgetCtrl.getPercentages();
-        // 3. Update the UI with the new percentages
-        UICtrl.displayPercentages(percentages);
-    };
-
-    var ctrlAddItem = function() {
-        var input, newItem;
-
-        // 1. Get the field input data
-        input = UICtrl.getInput();
-
-        if(input.description !== "" && !isNaN(input.value) && input.value > 0) {
-
-             // 2. Add the item to the budget controller
-        newItem = budgetCtrl.addItem(input.type, input.description, input.value);
+                var fields = document.querySelectorAll(
+                DomStrings.inputType + ',' +
+                DomStrings.inputDescription + ',' +
+                DomStrings.inputValue);
 
 
-    // 3. Add the item to the UI
-        UICtrl.addListItem(newItem, input.type);
+                nodeListForEach(fields, function(cur) {
+                    cur.classList.toggle('red-focus');
+                });
 
 
-    // 4. Clear the fields
-    UICtrl.clearFields();
+                document.querySelector(DomStrings.inputBtn).classList.toggle('red');
 
-    // 5. Calculate and update budget
-        updateBudget();
+        },
 
-    // 6. Calculate and update percentages
-            updatePercentages();
+            getDomStrings: function() {
+                return DomStrings;
+            }
+        };
 
-        }
-    };
+    })();
 
+
+    // GLOBAL CONTROLLER
+    var controller = (function(budgetCtrl, UICtrl){
+
+        var setUpEvenListeners = function() {
+            var Dom = UICtrl.getDomStrings();
+
+            document.querySelector(Dom.inputBtn).addEventListener('click', ctrlAddItem);
+
+        document.addEventListener('keypress', function(event){
+
+            if (event.keyCode === 13 || event.which === 13) {
+                ctrlAddItem();
+            }
+          });
+
+        
     var ctrlDeleteItem = function(event) {
         var itemID, splitID, type, ID;
 
