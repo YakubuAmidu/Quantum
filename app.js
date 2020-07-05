@@ -272,60 +272,44 @@ var nodeListForEach = function(list, callback) {
                     current.value = "";
                 });
 
-          
-        displayMonth: function() {
-            var now, months, month, year;
+                fieldsArr[0].focus();
 
-            now = new Date();
-            //var Christmas = new Date(2016, 11, 25);
-            months = ['January', 'Februay', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'November', 'December']
-            month = now.getMonth();
+            },
 
-            year = now.getFullYear();
-            document.querySelector(DomStrings.dateLabel).textContent = months[month] + ' ' + year;
+            displayBudget: function(obj) {
+            var type;
+            obj.budget > 0 ? type = 'inc' : type = 'exp';
 
+            document.querySelector(DomStrings.budgetLabel).textContent = formatNumber(obj.budget, type);
+            document.querySelector(DomStrings.incomeLabel).textContent = formatNumber(obj.totalInc, 'inc');
+            document.querySelector(DomStrings.expensesLabel).textContent = formatNumber(obj.totalExp, 'exp');
+
+
+            if(obj.percentage > 0) {
+                document.querySelector(DomStrings.percentageLabel).textContent = obj.percentage + '%';
+            } else {
+                document.querySelector(DomStrings.percentageLabel).textContent = '---';
+            }
         },
 
-        changedType: function() {
 
-            var fields = document.querySelectorAll(
-            DomStrings.inputType + ',' +
-            DomStrings.inputDescription + ',' +
-            DomStrings.inputValue);
+            displayPercentages: function(percentages) {
+
+                var fields = document.querySelectorAll(DomStrings.expensesPercLabel);
 
 
-            nodeListForEach(fields, function(cur) {
-                cur.classList.toggle('red-focus');
-            });
+                nodeListForEach(fields, function(current, index) {
 
+                    if(percentages[index] > 0) {
+                    current.textContent = percentages[index] + '%';
+                    } else {
+                        current.textContent = '---';
+                    }
+                });
 
-            document.querySelector(DomStrings.inputBtn).classList.toggle('red');
+            },
 
-    },
-
-        getDomStrings: function() {
-            return DomStrings;
-        }
-    };
-
-})();
-
-
-// GLOBAL CONTROLLER
-var controller = (function(budgetCtrl, UICtrl){
-
-    var setUpEvenListeners = function() {
-        var Dom = UICtrl.getDomStrings();
-
-        document.querySelector(Dom.inputBtn).addEventListener('click', ctrlAddItem);
-
-    document.addEventListener('keypress', function(event){
-
-        if (event.keyCode === 13 || event.which === 13) {
-            ctrlAddItem();
-        }
-      });
-
+      
         document.querySelector(Dom.container).addEventListener('click', ctrlDeleteItem);
 
         document.querySelector(Dom.inputType).addEventListener('change', UICtrl.changeType);
