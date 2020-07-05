@@ -121,64 +121,102 @@ return {
 
     },
 
-      
+    calculatePercentages: function() {
 
-    return {
-        getInput: function() {
-            return {
-            type: document.querySelector(DomStrings.inputType).value, // Will be either inc or exp
-            description: document.querySelector(DomStrings.inputDescription).value,
-            value: parseFloat(document.querySelector(DomStrings.inputValue).value)
-            };
-        },
+        /*
+        a=20
+        b=10
+        c=40
+        inconme = 100
+        a=20/100=20%
+        b=10/100=10%
+        c=40/100=40%
+        */
 
-        addListItem: function(obj, type) {
+        data.allItems.exp.forEach(function(cur){
+            cur.calcPercentage(data.totals.inc);
+        });
+},
 
-            var html, newHtml, element;
+    getPercentages: function() {
+        var allPerc = data.allItems.exp.map(function(cur){
+           return cur.getPercentage();
+        });
+        return allPerc;
 
-            // Create HTML string with placeholder text
+},
 
-            if(type === 'inc'){
-                element = DomStrings.incomeContainer;
+    getBudget: function() {
+        return {
+            budget: data.budget,
+            totalInc: data.totals.inc,
+            totalExp: data.totals.exp,
+            percentage: data.percentage
+        };
+    },
 
-                 html = '<div class="item clearfix" id="inc-%id%"> <div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></di></div></div>';
 
-            } else if(type === 'exp'){
-                element = DomStrings.ExpensesContainer;
+    testing: function() {
+        console.log(data);
+    }
+};
 
-                html = '<div class="item clearfix" id="exp-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+})();
+
+
+// UI CONTROLLER
+var UIController = (function(){
+
+var DomStrings = {
+    inputType: '.add__type',
+    inputDescription: '.add__description',
+    inputValue: '.add__value',
+    inputBtn: '.add__btn',
+    incomeContainer: '.income__list',
+    ExpensesContainer: '.expenses__list',
+    budgetLabel: '.budget__value',
+    incomeLabel: '.budget__income--value',
+    expensesLabel: '.budget__expenses--value',
+    percentageLabel: '.budget__expenses--percentage',
+    container: '.container',
+    expensesPercLabel: '.item__percentage',
+    dateLabel: '.budget__title--month'
+};
+
+var formatNumber = function(num, type) {
+            var numSplit, int, dec, type;
+            /*
+            + or - before number
+            exactly 2 decimal point
+            comma separating the thousands
+
+            2310.4567 -> +2,310.46
+            2000 -> +2,000.00
+            */
+
+        num = Math.abs(num);
+        num = num.toFixed(2);
+
+        numSplit = num.split('.');
+
+        int = numSplit[0];
+        if(int.length > 3) {
+            int = int.substr(0, int.length - 3) + ',' + int.substr(int.length - 3, int.length);
+        }
+
+        dec = numSplit[1];
+
+        return (type === 'exp' ? '-' : '+') + ' ' + int + '.' + dec;
+};
+
+var nodeListForEach = function(list, callback) {
+            for(var i = 0; i < list.length; i++) {
+                callback(list[i], i);
             }
-
-            // Replace the placeholder text with some actual data
-            newHtml = html.replace('%id%', obj.id);
-            newHtml = newHtml.replace('%description%', obj.description);
-            newHtml = newHtml.replace('%value%', formatNumber(obj.value, type));
+        };
 
 
-
-            // Insert the HTML into the DOM
-            document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
-
-        },
-
-        deleteListItem: function(selectorID) {
-
-            var el = document.getElementById(selectorID);
-            el.parentNode.removeChild(el);
-
-        },
-
-        clearFields: function() {
-            var fields, fieldsArr;
-
-            fields = document.querySelectorAll(DomStrings.inputDescription + ', ' + DomStrings.inputValue);
-
-            var fieldsArr = Array.prototype.slice.call(fields);
-
-            fieldsArr.forEach(function(current, index, array) {
-                current.value = "";
-            });
-
+    
             fieldsArr[0].focus();
 
         },
